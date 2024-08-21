@@ -1,6 +1,22 @@
 version: '3'
 
 services:
+  frontend:
+    container_name: frontend
+    build:
+      context: .
+      dockerfile: docker/frontend/Dockerfile
+    # image: analytics-app-image:latest
+    volumes:
+      - ./deps/frontend:/app/deps/frontend:rw
+      - ./docker/frontend:/app/docker/frontend:ro
+      - ./tmp:/app/tmp:rw
+    ports:
+      - 127.0.0.1:8080:80
+    env_file:
+      - ".env"
+    networks:
+      - soccer
   web:
     container_name: web
     build:
