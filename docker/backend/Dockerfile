@@ -13,4 +13,4 @@ COPY requirements.txt .
 RUN pip3 install -r requirements.txt
 
 ENTRYPOINT ["tini", "--"]
-CMD ["gunicorn", "python.io_atomgroup.soccer"]
+CMD ["bash", "docker/backend/serve.sh"]
