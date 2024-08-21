@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  web:
+    container_name: web
+    build:
+      context: .
+      dockerfile: ./docker/backend/Dockerfile
+    # image: analytics-app-image:latest
+    volumes:
+      - ./:/app:rw
+      - ./tmp:/app/tmp:rw
+    ports:
+      - 127.0.0.1:8080:8080
+    env_file:
+      - ".env"
+    networks:
+      - soccer
+
+networks:
+  soccer:
+    driver: bridge
