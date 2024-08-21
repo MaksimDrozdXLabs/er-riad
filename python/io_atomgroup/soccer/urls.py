@@ -24,6 +24,10 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 ]
 
+#import socketio
+#sio = socketio.AsyncServer()
+#sio_app = socketio.ASGIApp(sio)
+
 if settings.DEBUG:
      urlpatterns += [
         re_path(r"^static/(?P<path>.*)$", views.serve),

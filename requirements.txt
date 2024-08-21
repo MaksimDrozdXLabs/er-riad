@@ -3,3 +3,6 @@ django
 ipython
 ipdb
 uvicorn
+fastapi
+python-socketio
+rpdb
