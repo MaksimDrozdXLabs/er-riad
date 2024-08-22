@@ -1,6 +1,17 @@
 version: '3'
 
 services:
+  mqtt:
+    image: eclipse-mosquitto
+    container_name: mqtt
+    volumes:
+      - ./docker/mqtt:/app/docker/mqtt:ro
+      - ./docker/mqtt/config:/mosquitto/config:ro
+      - ./tmp/mqtt:/app/tmp/mqtt:rw
+    env_file:
+      - ".env"
+    networks:
+      - soccer
   frontend:
     container_name: frontend
     build:
