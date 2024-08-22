@@ -1,6 +1,17 @@
 version: '3'
 
 services:
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    volumes:
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d:ro
+    env_file:
+      - ".env"
+    ports:
+      - 127.0.0.1:80:80
+    networks:
+      - soccer
   mqtt:
     image: eclipse-mosquitto
     container_name: mqtt
@@ -23,8 +34,6 @@ services:
       - ./deps/frontend:/app/deps/frontend:rw
       - ./docker/frontend:/app/docker/frontend:ro
       - ./tmp:/app/tmp:rw
-    ports:
-      - 127.0.0.1:8080:80
     env_file:
       - ".env"
     networks:
@@ -39,8 +48,6 @@ services:
     volumes:
       - ./:/app:rw
       - ./tmp:/app/tmp:rw
-    ports:
-      - 127.0.0.1:80:8000
     env_file:
       - ".env"
     networks:
