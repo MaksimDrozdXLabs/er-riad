@@ -37,9 +37,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'python.io_atomgroup.soccer.participant',
+    'python.io_atomgroup.soccer.participant.apps.ParticipantConfig',
     'python.io_atomgroup.soccer.leaderboard',
     'python.io_atomgroup.soccer.estimator',
+    'python.io_atomgroup.soccer.api',
+    'rest_framework',
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [
