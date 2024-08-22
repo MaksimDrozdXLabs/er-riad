@@ -23,3 +23,4 @@ class Estimator(serializers.Serializer):
     counter = serializers.IntegerField(required=False)
     pose = Pose(required=False)
     ball = Ball(required=False)
+    ts = serializers.DateTimeField()

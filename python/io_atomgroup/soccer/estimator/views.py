@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.utils import timezone
 from .. import sio
 from . import serializers
 
@@ -11,6 +12,7 @@ async def connect(sid, environ, auth):
         serializers.Estimator(
             instance=dict(
                 participant=1,
+                ts=timezone.now(),
             )
         ).data
     )
