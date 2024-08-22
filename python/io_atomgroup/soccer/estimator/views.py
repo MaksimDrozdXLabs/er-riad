@@ -2,11 +2,18 @@ from django.shortcuts import render
 from .. import sio
 
 @sio.sio.event
-def connect(sid, environ, auth):
+async def connect(sid, environ, auth):
     print('connect ', sid)
 
+    await sio.sio.emit(
+        'ml_to_front',
+        dict(
+            a=1,
+        )
+    )
+
 @sio.sio.event
-def disconnect(sid):
+async def disconnect(sid):
     print('disconnect ', sid)
 
 # Create your views here.
