@@ -24,7 +24,9 @@ def wm(*argv):
         *argv,
     )
 
-if sys.argv[1] == 'wm':
+if sys.argv[1] == 'c':
+    c(*sys.argv[2:])
+elif sys.argv[1] == 'wm':
     wm(*sys.argv[2:])
 elif sys.argv[1] == 'wmr':
     c('exec', '-it', 'web', 'pkill', '-HUP', 'gunicorn')
