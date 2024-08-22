@@ -1,0 +1,10 @@
+gunicorn
+django
+ipython
+ipdb
+uvicorn
+fastapi
+python-socketio
+rpdb
+django-rest-framework
+drf-yasg
