@@ -4,3 +4,6 @@
 [submodule "deps/backend-example"]
 	path = deps/backend-example
 	url = ssh://git@gitlab.enigmagroup.tech:2224/enigma/computer-vision/backend/analytics-service.git
+[submodule "deps/metrics_gateway_client"]
+	path = deps/metrics_gateway_client
+	url = ssh://git@gitlab.enigmagroup.tech:2224/enigma/computer-vision/backend/metrics-gateway-client.git
