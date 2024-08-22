@@ -22,7 +22,7 @@ from django.contrib.staticfiles import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include('python.io_atomgroup.soccer.api.urls')),
+    re_path(r'', include('python.io_atomgroup.soccer.api.urls')),
 ]
 
 #import socketio
