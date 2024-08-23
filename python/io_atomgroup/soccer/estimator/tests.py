@@ -12,7 +12,7 @@ class TestEstimator(TestCase):
                 'ws://nginx/socket.io',
             )
             sid = client.sid
-            response = await client.receive()
-            response = await client.receive()
+            response = await client.receive(timeout=1)
+            response = await client.receive(timeout=1)
             import ipdb
             ipdb.set_trace()
