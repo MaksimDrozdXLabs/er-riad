@@ -11,7 +11,7 @@ ENV \
 
 COPY requirements.txt .
 RUN pip3 install -r requirements.txt
-RUN ipython3 profile create
+# RUN ipython3 profile create
 
 ENTRYPOINT ["tini", "--"]
 CMD ["bash", "docker/backend/serve.sh"]
