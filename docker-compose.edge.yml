@@ -13,8 +13,11 @@ services:
     networks:
       - soccer
   mqtt:
-    image: eclipse-mosquitto
+    # image: eclipse-mosquitto
     container_name: mqtt
+    build:
+      context: .
+      dockerfile: docker/mqtt/Dockerfile
     volumes:
       - ./docker/mqtt:/app/docker/mqtt:ro
       - ./docker/mqtt/config:/mosquitto/config:ro
