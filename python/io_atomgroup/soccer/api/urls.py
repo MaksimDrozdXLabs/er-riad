@@ -19,12 +19,12 @@ schema_view = get_schema_view(
 print('blah')
 urlpatterns = [
    re_path(
-       r'leaderboard',
+       r'leaderboard/',
        include('python.io_atomgroup.soccer.leaderboard.urls'),
        name='leaderboard',
    ),
    re_path(
-       r'participant',
+       r'participant/',
        include('python.io_atomgroup.soccer.participant.urls'),
        name='participant',
    ),
