@@ -25,7 +25,16 @@ BASE_DIR = Path(__file__).resolve().parent
 SECRET_KEY = os.environ.get('WEB_SECRET_KEY', 'django-insecure-qq+75g969@kj0bpu2f&&#nxt5_2cb0ltk7g#m6bl0(qm*k1mg5')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+
+if 'WEB_STATIC_VIEW' in os.environ:
+    STATIC_VIEW = json.loads(os.environ['WEB_STATIC_VIEW'])
+else:
+    STATIC_VIEW = True
+
+if 'WEB_DEBUG' in os.environ:
+    DEBUG = json.loads(os.environ['WEB_DEBUG'])
+else:
+    DEBUG = False
 
 if 'WEB_ALLOWED_HOSTS' in os.environ:
     ALLOWED_HOSTS = json.loads(os.environ['WEB_ALLOWED_HOSTS'])
