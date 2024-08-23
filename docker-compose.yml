@@ -57,6 +57,37 @@ services:
     networks:
       - soccer
 
+  celery-beat:
+    container_name: celery-beat
+    build:
+      context: .
+      dockerfile: ./docker/backend/Dockerfile
+    # image: analytics-app-image:latest
+    volumes:
+      - ./:/app:rw
+      - ./tmp:/app/tmp:rw
+    command:
+      - celery -A python.io_atomgroup.soccer beat
+    env_file:
+      - ".env"
+    networks:
+      - soccer
+
+  celery-worker:
+    container_name: celery-beat
+    build:
+      context: .
+      dockerfile: ./docker/backend/Dockerfile
+    # image: analytics-app-image:latest
+    command: ["celery", "-A", "python.io_atomgroup.soccer", "worker"]
+    volumes:
+      - ./:/app:rw
+      - ./tmp:/app/tmp:rw
+    env_file:
+      - ".env"
+    networks:
+      - soccer
+
 networks:
   soccer:
     driver: bridge
