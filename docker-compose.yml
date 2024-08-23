@@ -73,6 +73,15 @@ services:
     networks:
       - soccer
 
+  redis:
+    image: redis:latest
+    container_name: redis
+    volumes:
+      - ./tmp/redis:/data:rw
+    # environment:
+    networks:
+      - soccer
+
   celery-worker:
     container_name: celery-beat
     build:

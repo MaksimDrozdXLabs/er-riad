@@ -2,7 +2,7 @@ FROM python:latest
 
 WORKDIR /app
 
-RUN apt-get update -yy && apt-get install -y tini
+RUN apt-get update -yy && apt-get install -y tini less iputils-ping net-tools netcat-traditional
 
 ENV \
     PYTHONDONTWRITEBYTECODE=1 \
