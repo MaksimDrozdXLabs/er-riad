@@ -16,3 +16,6 @@ app.conf.broker_url = 'redis://redis:6379/0'
 
 # Load task modules from all registered Django apps.
 app.autodiscover_tasks()
+app.autodiscover_tasks([
+    'python.io_atomgroup.soccer.estimator',
+])
