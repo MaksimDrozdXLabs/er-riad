@@ -29,7 +29,8 @@ urlpatterns = [
 #sio = socketio.AsyncServer()
 #sio_app = socketio.ASGIApp(sio)
 
-if settings.DEBUG:
+# if settings.DEBUG:
+if settings.STATIC_VIEW:
      urlpatterns += [
         re_path(r"^static/(?P<path>.*)$", views.serve),
     ]

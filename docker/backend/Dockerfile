@@ -2,7 +2,7 @@ FROM python:latest
 
 WORKDIR /app
 
-RUN apt-get update -yy && apt-get install -y tini
+RUN apt-get update -yy && apt-get install -y tini less iputils-ping net-tools netcat-traditional
 
 ENV \
     PYTHONDONTWRITEBYTECODE=1 \
@@ -11,7 +11,7 @@ ENV \
 
 COPY requirements.txt .
 RUN pip3 install -r requirements.txt
-RUN ipython3 profile create
+# RUN ipython3 profile create
 
 ENTRYPOINT ["tini", "--"]
 CMD ["bash", "docker/backend/serve.sh"]

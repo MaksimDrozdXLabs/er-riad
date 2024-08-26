@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import json
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent
@@ -20,15 +22,41 @@ BASE_DIR = Path(__file__).resolve().parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-qq+75g969@kj0bpu2f&&#nxt5_2cb0ltk7g#m6bl0(qm*k1mg5'
+SECRET_KEY = os.environ.get('WEB_SECRET_KEY', 'django-insecure-qq+75g969@kj0bpu2f&&#nxt5_2cb0ltk7g#m6bl0(qm*k1mg5')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
 
-ALLOWED_HOSTS = ['web']
+if 'WEB_STATIC_VIEW' in os.environ:
+    STATIC_VIEW = json.loads(os.environ['WEB_STATIC_VIEW'])
+else:
+    STATIC_VIEW = True
 
+if 'WEB_DEBUG' in os.environ:
+    DEBUG = json.loads(os.environ['WEB_DEBUG'])
+else:
+    DEBUG = False
+
+if 'WEB_ALLOWED_HOSTS' in os.environ:
+    ALLOWED_HOSTS = json.loads(os.environ['WEB_ALLOWED_HOSTS'])
+else:
+    ALLOWED_HOSTS = ['web']
+
+if 'WEB_CORS_ORIGIN_WHITELIST' in os.environ:
+    CORS_ORIGIN_WHITELIST = json.loads(os.environ['WEB_CORS_ORIGIN_WHITELIST'])
+else:
+    CORS_ORIGIN_ALLOW_ALL = True
+
+if 'WEB_CSRF_TRUSTED_ORIGINS' in os.environ:
+    CSRF_TRUSTED_ORIGINS = json.loads(os.environ['WEB_CSRF_TRUSTED_ORIGINS'])
+else:
+    CSRF_TRUSTED_ORIGINS = ["http://127.0.0.1"]
 
 # Application definition
+
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination'
+}
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -53,6 +81,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'python.io_atomgroup.soccer.urls'
@@ -121,7 +150,24 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+
+if not DEBUG:
+    STATIC_ROOT = BASE_DIR.parent.parent.parent / 'tmp' / 'static'
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "WARNING",
+    },
+}
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field

@@ -16,6 +16,8 @@ def c(*argv):
 def wm(*argv):
     return c(
         'exec',
+        '-e',
+        'TERM=xterm-256color',
         '-it',
         'web',
         'python3',

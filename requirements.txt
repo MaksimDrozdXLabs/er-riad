@@ -8,3 +8,7 @@ python-socketio
 rpdb
 django-rest-framework
 drf-yasg
+django-cors-headers
+celery
+redis
+paho-mqtt
