@@ -72,6 +72,7 @@ INSTALLED_APPS = [
     'python.io_atomgroup.soccer.estimator',
     'python.io_atomgroup.soccer.api',
     'rest_framework',
+    'django_celery_beat',
     'drf_yasg',
 ]
 
