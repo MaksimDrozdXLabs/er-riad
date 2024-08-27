@@ -23,6 +23,8 @@ services:
       - ./docker/mqtt:/app/docker/mqtt:ro
       - ./docker/mqtt/config:/mosquitto/config:ro
       - ./tmp/mqtt:/app/tmp/mqtt:rw
+    ports:
+      - ${MQTT_PORTS:-127.0.0.1:1883:1883}
     env_file:
       - ".env"
     networks:
