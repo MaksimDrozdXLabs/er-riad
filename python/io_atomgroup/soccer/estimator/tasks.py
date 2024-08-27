@@ -1,4 +1,5 @@
 import celery
+import datetime
 import pydantic
 import pydantic_core
 import enum
@@ -30,6 +31,8 @@ class ML:
 
         ball : Optional[Ball] = None
         pose : Optional[Pose] = None
+        count : Optional[int] = 0
+        ts : Optional[datetime.datetime] = None
 
 @celery.shared_task()
 def task_simulate_estimator(
