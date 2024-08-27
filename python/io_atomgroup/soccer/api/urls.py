@@ -16,7 +16,6 @@ schema_view = get_schema_view(
    permission_classes=[permissions.AllowAny,],
 )
 
-print('blah')
 urlpatterns = [
     #re_path(
     #    r'leaderboard/',

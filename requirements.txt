@@ -19,4 +19,5 @@ django-stubs
 celery-types
 djangorestframework-stubs
 drf-yasg-stubs
-django-celery-beat
+#django-celery-beat
+./deps/django-celery-beat

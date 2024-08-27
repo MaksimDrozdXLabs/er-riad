@@ -7,3 +7,6 @@
 [submodule "deps/metrics_gateway_client"]
 	path = deps/metrics_gateway_client
 	url = ssh://git@gitlab.enigmagroup.tech:2224/enigma/computer-vision/backend/metrics-gateway-client.git
+[submodule "deps/django-celery-beat"]
+	path = deps/django-celery-beat
+	url = https://github.com/celery/django-celery-beat
