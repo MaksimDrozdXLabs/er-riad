@@ -1,14 +1,35 @@
 import celery
+import pydantic
+import pydantic_core
 import enum
-from typing import (Optional,)
+from typing import (Optional, Literal, List)
 import logging
 
 
 logger = logging.getLogger(__name__)
 
 
-class MLMessageType(enum.Enum):
-    kickup = 'ml.juggling'
+class ML:
+    class MessageType(enum.Enum):
+        kickup = 'ml.juggling'
+
+    class Kickup(pydantic.BaseModel):
+        class Ball(pydantic.BaseModel):
+            x : int | float
+            y : int | float
+            z : int | float
+
+        class Pose(pydantic.BaseModel):
+            class Joint(pydantic.BaseModel):
+                x : int | float
+                y : int | float
+                z : int | float
+                _type : Literal['Head', 'LFoot', 'RFoot']
+
+            joints : List[Joint]
+
+        ball : Optional[Ball] = None
+        pose : Optional[Pose] = None
 
 @celery.shared_task()
 def task_simulate_estimator(
@@ -44,10 +65,36 @@ def task_simulate_estimator(
                 break
 
             client.publish(
-                MLMessageType.kickup.value,
+                ML.MessageType.kickup.value,
                 json.dumps(dict(
-                    a=1,
-                    b=done_count,
+                    pose=dict(
+                        joints=[
+                            dict(
+                                x=0,
+                                y=0,
+                                z=0,
+                                joint='Head',
+                            ),
+                            dict(
+                                x=0,
+                                y=0,
+                                z=0,
+                                joint='LFoot',
+                            ),
+                            dict(
+                                x=0,
+                                y=0,
+                                z=0,
+                                joint='RFoot',
+                            ),
+                        ],
+                    ),
+                    ball=dict(
+                        x=0,
+                        y=0,
+                        z=0,
+                    ),
+                    count=4,
                     ts=timezone.now().isoformat(),
                 )),
                 qos=client.QoS.at_least_once.value,
@@ -55,8 +102,7 @@ def task_simulate_estimator(
             time.sleep(delay)
             done_count += 1
 
-@celery.shared_task()
-def task_process_estimator(
+def task_process_estimator_raw(
     max_time: Optional[float | int] = None,
 ) -> None:
 
@@ -79,12 +125,18 @@ def task_process_estimator(
 
     def mqtt_on_message(client, userdata, message):
         import pprint
-        if message.topic == MLMessageType.kickup.value:
+        payload = pydantic_core.from_json(message.payload)
+
+        if message.topic == ML.MessageType.kickup.value:
+            kickup = ML.Kickup.model_validate(
+                payload,
+            )
+            import ipdb
+            ipdb.set_trace()
             pass
         else:
             raise NotImplementedError
 
-        payload = json.loads(message.payload)
 
         logger.info(json.dumps(dict(
             qos=message.qos,
@@ -97,7 +149,7 @@ def task_process_estimator(
 
         client.on_message = mqtt_on_message
         subscribe_res = client.subscribe(
-            MLMessageType.kickup.value,
+            ML.MessageType.kickup.value,
         )
         assert subscribe_res[0] == paho.mqtt.client.MQTT_ERR_SUCCESS
 
@@ -105,3 +157,7 @@ def task_process_estimator(
             client.loop(timeout=1)
             if elapsed_get() > max_time:
                 break
+
+@celery.shared_task()
+def task_process_estimator(*args, **kwargs):
+    return task_process_estimator_raw(*args, **kwargs)
