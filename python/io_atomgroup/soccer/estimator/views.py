@@ -51,7 +51,8 @@ async def connect(sid, environ, auth):
                     z=0,
                 ),
             )
-        ).data
+        ).data,
+        to=sid,
     )
 
 @sio.sio.event
