@@ -102,7 +102,6 @@ def task_process_estimator_raw(
     elapsed_get = lambda : (timezone.now() - started_at).total_seconds()
 
     def mqtt_on_message(client, userdata, message):
-        import pprint
         from . import logic
         payload = pydantic_core.from_json(message.payload)
 
