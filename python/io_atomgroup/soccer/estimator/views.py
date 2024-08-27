@@ -1,18 +1,12 @@
 import logging
 import json
 from django.shortcuts import render
-import enum
 from django.utils import timezone
 from .. import sio
 from . import serializers
+from .models import Sio
 
 logger = logging.getLogger(__name__)
-
-class MessageType(enum.Enum):
-    connect = 'connect'
-    participant_updated = 'participant.updated'
-    disconnect = 'disconnect'
-
 
 @sio.sio.event
 async def connect(sid, environ, auth):
@@ -37,7 +31,7 @@ async def connect(sid, environ, auth):
     )))
 
     await sio.sio.emit(
-        MessageType.participant_updated.value,
+        Sio.MessageType.participant_updated.value,
         serializers.Estimator(
             instance=dict(
                 participant=1,

@@ -102,15 +102,14 @@ def task_process_estimator_raw(
 
     def mqtt_on_message(client, userdata, message):
         import pprint
+        from . import logic
         payload = pydantic_core.from_json(message.payload)
 
         if message.topic == ML.MessageType.kickup.value:
             kickup = ML.Kickup.model_validate(
                 payload,
             )
-            import ipdb
-            ipdb.set_trace()
-            pass
+            logic.estimator_process_kickup(kickup)
         else:
             raise NotImplementedError
 
