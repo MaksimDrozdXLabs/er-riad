@@ -10,11 +10,12 @@ https://docs.djangoproject.com/en/5.1/howto/deployment/asgi/
 import os
 
 import fastapi
-from . import sio
-from django.core.asgi import get_asgi_application
 from fastapi.middleware.cors import CORSMiddleware
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'python.io_atomgroup.soccer.settings')
+
+from django.core.asgi import get_asgi_application
+from . import sio
 
 fastapi_app = fastapi.FastAPI()
 

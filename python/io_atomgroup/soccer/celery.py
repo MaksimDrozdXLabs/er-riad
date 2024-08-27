@@ -6,13 +6,16 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'python.io_atomgroup.soccer.sett
 
 app = Celery('python.io_atomgroup.soccer')
 
+import django.conf
+
+
 # Using a string here means the worker doesn't have to serialize
 # the configuration object to child processes.
 # - namespace='CELERY' means all celery-related configuration keys
 #   should have a `CELERY_` prefix.
 # app.config_from_object('django.conf:settings', namespace='CELERY')
 
-app.conf.broker_url = 'redis://redis:6379/0'
+app.conf.broker_url = django.conf.settings.CELERY_BROKER_URL
 
 # Load task modules from all registered Django apps.
 app.autodiscover_tasks()

@@ -26,6 +26,9 @@ SECRET_KEY = os.environ.get('WEB_SECRET_KEY', 'django-insecure-qq+75g969@kj0bpu2
 
 # SECURITY WARNING: don't run with debug turned on in production!
 
+CELERY_BROKER_URL = 'redis://redis:6379/0'
+SIO_REDIS = 'redis://redis:6379/1'
+
 if 'WEB_STATIC_VIEW' in os.environ:
     STATIC_VIEW = json.loads(os.environ['WEB_STATIC_VIEW'])
 else:
