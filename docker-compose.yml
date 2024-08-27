@@ -89,7 +89,7 @@ services:
       context: .
       dockerfile: ./docker/backend/Dockerfile
     # image: analytics-app-image:latest
-    command: ["celery", "-A", "python.io_atomgroup.soccer", "worker", "-c", "1"]
+    command: ["celery", "-A", "python.io_atomgroup.soccer", "worker", "-c", "2", "-Q", "celery,admin"]
     volumes:
       - ./:/app:rw
       - ./tmp:/app/tmp:rw
