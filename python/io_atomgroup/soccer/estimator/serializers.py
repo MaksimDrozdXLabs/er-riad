@@ -17,7 +17,7 @@ class Pose(serializers.Serializer):
         z = serializers.IntegerField()
         joint = serializers.CharField()
 
-    coords = serializers.ListSerializer(
+    coords = serializers.ListSerializer[Coord](
         child=Coord()
     )
 
@@ -45,11 +45,11 @@ class ML:
                 x : int | float
                 y : int | float
                 z : int | float
-                _type : Literal['Head', 'LFoot', 'RFoot']
+                joint : Literal['Head', 'LFoot', 'RFoot']
 
             joints : List[Joint]
 
         ball : Optional[Ball] = None
         pose : Optional[Pose] = None
-        count : Optional[int] = 0
+        count : int = 0
         ts : Optional[datetime.datetime] = None

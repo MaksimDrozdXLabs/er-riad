@@ -33,8 +33,6 @@ class TestEstimator(TestCase):
             )
 
             response = await client.receive(timeout=1)
-            import ipdb
-            ipdb.set_trace()
 
     async def test_socket_eternalread(self):
         import socketio

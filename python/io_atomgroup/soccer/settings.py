@@ -69,7 +69,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'python.io_atomgroup.soccer.participant.apps.ParticipantConfig',
-    'python.io_atomgroup.soccer.leaderboard',
     'python.io_atomgroup.soccer.estimator',
     'python.io_atomgroup.soccer.api',
     'rest_framework',

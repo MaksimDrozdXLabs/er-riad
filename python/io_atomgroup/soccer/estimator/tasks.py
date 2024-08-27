@@ -44,21 +44,21 @@ def task_simulate_estimator(
             client.publish(
                 ML.MessageType.kickup.value,
                 ML.Kickup(
-                    pose=dict(
+                    pose=ML.Kickup.Pose(
                         joints=[
-                            dict(
+                            ML.Kickup.Pose.Joint(
                                 x=0,
                                 y=0,
                                 z=0,
                                 joint='Head',
                             ),
-                            dict(
+                            ML.Kickup.Pose.Joint(
                                 x=0,
                                 y=0,
                                 z=0,
                                 joint='LFoot',
                             ),
-                            dict(
+                            ML.Kickup.Pose.Joint(
                                 x=0,
                                 y=0,
                                 z=0,
@@ -66,13 +66,13 @@ def task_simulate_estimator(
                             ),
                         ],
                     ),
-                    ball=dict(
+                    ball=ML.Kickup.Ball(
                         x=0,
                         y=0,
                         z=0,
                     ),
                     count=4,
-                    ts=timezone.now().isoformat(),
+                    ts=timezone.now(),
                 ).json(),
                 qos=client.QoS.at_least_once.value,
             )

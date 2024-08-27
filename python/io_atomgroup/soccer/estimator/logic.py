@@ -32,7 +32,9 @@ def estimator_process_kickup(kickup: ML.Kickup) -> None:
             )))
             return
 
+        assert kickup.count
         p.score += kickup.count
+
         p.save(update_fields=['score'])
         mgr_pub.emit(
             Sio.MessageType.participant_updated,
