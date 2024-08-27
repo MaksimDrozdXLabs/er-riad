@@ -1,8 +1,12 @@
+import logging
+import json
 from django.shortcuts import render
 import enum
 from django.utils import timezone
 from .. import sio
 from . import serializers
+
+logger = logging.getLogger(__name__)
 
 class MessageType(enum.Enum):
     connect = 'connect'
@@ -12,7 +16,25 @@ class MessageType(enum.Enum):
 
 @sio.sio.event
 async def connect(sid, environ, auth):
-    print('connect ', sid)
+    await sio.sio.save_session(
+        sid,
+        dict(
+            http=dict(
+                referer=environ.get('HTTP_REFERER'),
+                user_agent=environ.get('HTTP_USER_AGENT'),
+            ),
+            asgi=dict(
+                scope=dict(
+                    client=environ['asgi.scope'].get('client'),
+                )
+            )
+        )
+    )
+    logger.info(json.dumps(dict(
+        msg='connect ',
+        sid=sid,
+        session=await sio.sio.get_session(sid),
+    )))
 
     await sio.sio.emit(
         MessageType.participant_updated.value,
@@ -57,6 +79,10 @@ async def connect(sid, environ, auth):
 
 @sio.sio.event
 async def disconnect(sid):
-    print('disconnect ', sid)
+    logger.info(json.dumps(dict(
+        msg='disconnect ',
+        sid=sid,
+        session=await sio.sio.get_session(sid),
+    )))
 
 # Create your views here.
