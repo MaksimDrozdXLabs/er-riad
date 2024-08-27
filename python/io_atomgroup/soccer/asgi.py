@@ -41,4 +41,6 @@ fastapi_app.mount(
 
 import python.io_atomgroup.soccer.estimator.views
 
+from . import celery
+
 application = fastapi_app
