@@ -1,3 +1,8 @@
+import enum
+import datetime
+import pydantic
+import pydantic_core
+from typing import (Optional, Literal, List)
 from rest_framework import serializers
 
 class Ball(serializers.Serializer):
@@ -24,3 +29,27 @@ class Estimator(serializers.Serializer):
     pose = Pose(required=False)
     ball = Ball(required=False)
     ts = serializers.DateTimeField()
+
+class ML:
+    class MessageType(enum.Enum):
+        kickup = 'ml.juggling'
+
+    class Kickup(pydantic.BaseModel):
+        class Ball(pydantic.BaseModel):
+            x : int | float
+            y : int | float
+            z : int | float
+
+        class Pose(pydantic.BaseModel):
+            class Joint(pydantic.BaseModel):
+                x : int | float
+                y : int | float
+                z : int | float
+                _type : Literal['Head', 'LFoot', 'RFoot']
+
+            joints : List[Joint]
+
+        ball : Optional[Ball] = None
+        pose : Optional[Pose] = None
+        count : Optional[int] = 0
+        ts : Optional[datetime.datetime] = None

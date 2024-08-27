@@ -1,38 +1,12 @@
 import celery
-import datetime
-import pydantic
-import pydantic_core
-import enum
 from typing import (Optional, Literal, List)
+import pydantic_core
 import logging
+from .serializers import ML
 
 
 logger = logging.getLogger(__name__)
 
-
-class ML:
-    class MessageType(enum.Enum):
-        kickup = 'ml.juggling'
-
-    class Kickup(pydantic.BaseModel):
-        class Ball(pydantic.BaseModel):
-            x : int | float
-            y : int | float
-            z : int | float
-
-        class Pose(pydantic.BaseModel):
-            class Joint(pydantic.BaseModel):
-                x : int | float
-                y : int | float
-                z : int | float
-                _type : Literal['Head', 'LFoot', 'RFoot']
-
-            joints : List[Joint]
-
-        ball : Optional[Ball] = None
-        pose : Optional[Pose] = None
-        count : Optional[int] = 0
-        ts : Optional[datetime.datetime] = None
 
 @celery.shared_task()
 def task_simulate_estimator(
@@ -69,7 +43,7 @@ def task_simulate_estimator(
 
             client.publish(
                 ML.MessageType.kickup.value,
-                json.dumps(dict(
+                ML.Kickup(
                     pose=dict(
                         joints=[
                             dict(
@@ -99,7 +73,7 @@ def task_simulate_estimator(
                     ),
                     count=4,
                     ts=timezone.now().isoformat(),
-                )),
+                ).json(),
                 qos=client.QoS.at_least_once.value,
             )
             time.sleep(delay)
