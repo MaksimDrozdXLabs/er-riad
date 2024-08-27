@@ -74,7 +74,8 @@ def task_simulate_estimator(
                     count=4,
                     ts=timezone.now(),
                 ).json(),
-                qos=client.QoS.at_least_once.value,
+                #qos=client.QoS.at_least_once.value,
+                qos=client.QoS.at_most_once.value,
             )
             time.sleep(delay)
             done_count += 1
