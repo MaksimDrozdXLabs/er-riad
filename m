@@ -28,6 +28,8 @@ def wm(*argv):
 
 if sys.argv[1] == 'c':
     c(*sys.argv[2:])
+elif sys.argv[1] == 'lint':
+    c('exec', '-it', 'web', 'mypy', 'python')
 elif sys.argv[1] == 'wm':
     wm(*sys.argv[2:])
 elif sys.argv[1] == 'wmr':
