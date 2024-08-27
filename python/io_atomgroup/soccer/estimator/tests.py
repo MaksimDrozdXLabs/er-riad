@@ -13,6 +13,12 @@ class TestEstimator(TestCase):
             )
             sid = client.sid
             response = await client.receive(timeout=1)
+
+            self.assertEqual(
+                response[0],
+                'participant.updated',
+            )
+
             response = await client.receive(timeout=1)
             import ipdb
             ipdb.set_trace()
