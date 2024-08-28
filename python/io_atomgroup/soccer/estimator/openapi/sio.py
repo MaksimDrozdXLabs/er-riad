@@ -11,7 +11,7 @@ class ParticipantUpdated(rest_framework.serializers.Serializer):
     participant = ParticipantSerializer()
 
 @drf_yasg.utils.swagger_auto_schema(
-    methods=['POST'],
+    methods=['GET'],
     responses={
         200: drf_yasg.openapi.Response(
             'participant data',
@@ -19,7 +19,7 @@ class ParticipantUpdated(rest_framework.serializers.Serializer):
         )
     },
 )
-@rest_framework.decorators.api_view(['POST'])
+@rest_framework.decorators.api_view(['GET'])
 def participant_updated(*args, **kwargs):
     '''
         being trigger when score has been updated
