@@ -13,6 +13,25 @@ class Kickup(rest_framework.serializers.Serializer):
 @drf_yasg.utils.swagger_auto_schema(
     methods=['PUT'],
     request_body=ML.KickupSerializer,
+    responses={200: None},
+    operation_summary=ML.MessageType.kickup.value,
+    operation_description='''
+        a message published by ML
+        to mqtt, when a kickup has happened
+
+        ```python
+            client.publish(
+                "{M}",
+                ML.Kickup(
+                    ts=timezone.now(),
+                ).json(),
+                #qos=client.QoS.at_least_once.value,
+                qos=client.QoS.at_most_once.value,
+            )
+        ```
+    '''.replace(
+        '{M}', ML.MessageType.kickup.value,
+    ),
     #responses={
     #    200: drf_yasg.openapi.Response(
     #        'participant data',
@@ -20,12 +39,7 @@ class Kickup(rest_framework.serializers.Serializer):
     #},
 )
 @rest_framework.decorators.api_view(['PUT'])
-def ml_kickup(*args, **kwargs):
-    '''
-        a message published by ML
-        to mqtt, when a kickup has happened
-    '''
-
+def ml_kickup(*args, **kwargs) -> None:
     raise NotImplementedError
 
 urlpatterns = [

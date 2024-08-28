@@ -32,15 +32,12 @@ async def connect(sid, environ, auth):
 
     await sio.sio.emit(
         Sio.MessageType.participant_updated.value,
-        serializers.Estimator(
+        serializers.ML.KickupSerializer(
             instance=dict(
-                participant=1,
                 ts=timezone.now(),
-                is_start=True,
-                counter=1,
-                is_stop=False,
+                count=1,
                 pose=dict(
-                    coords=[
+                    joints=[
                         dict(
                             x=0,
                             y=0,

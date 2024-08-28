@@ -5,9 +5,6 @@ import pydantic_core
 from typing import (Optional, Literal, List)
 from rest_framework import serializers
 
-
-
-
 class ML:
     class MessageType(enum.Enum):
         kickup = 'ml.juggling'

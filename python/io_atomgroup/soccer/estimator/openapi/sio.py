@@ -13,6 +13,18 @@ class ParticipantUpdated(rest_framework.serializers.Serializer):
 
 @drf_yasg.utils.swagger_auto_schema(
     methods=['GET'],
+    operation_summary=Sio.MessageType.participant_updated.value,
+    operation_description='''
+        being trigger when score has been updated
+        for a Participant with status=started
+        by an ML estimator
+
+        ```js
+            socket.on('{M}', (data) => {...});
+        ```
+    '''.replace(
+        '{M}', Sio.MessageType.participant_updated.value,
+    ),
     responses={
         200: drf_yasg.openapi.Response(
             'participant data',
@@ -22,11 +34,6 @@ class ParticipantUpdated(rest_framework.serializers.Serializer):
 )
 @rest_framework.decorators.api_view(['GET'])
 def participant_updated(*args, **kwargs):
-    '''
-        being trigger when score has been updated
-        for a Participant with status=started
-        by an ML estimator
-    '''
 
     raise NotImplementedError
 
