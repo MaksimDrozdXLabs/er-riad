@@ -7,10 +7,13 @@ mgr = socketio.AsyncRedisManager(settings.SIO_REDIS)
 
 sio = socketio.AsyncServer(
     async_mode='asgi',
-    cors_allowed_origins='*',
+    #cors_allowed_origins=['*'],
+    cors_allowed_origins=[],
+    #cors_credentials=False,
     client_manager=mgr,
     ping_timeout=5,
     ping_interval=5,
+    #transports=["websocket"],
     #logger=True,
     #engineio_logger=True,
 )

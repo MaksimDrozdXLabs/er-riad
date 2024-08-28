@@ -107,6 +107,7 @@ def task_process_estimator_raw(
         from . import logic
         payload = pydantic_core.from_json(message.payload)
 
+        print('blah')
         if message.topic == ML.MessageType.kickup.value:
             kickup = ML.Kickup.model_validate(
                 payload,
