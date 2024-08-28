@@ -5,30 +5,8 @@ import pydantic_core
 from typing import (Optional, Literal, List)
 from rest_framework import serializers
 
-class Ball(serializers.Serializer):
-    x = serializers.IntegerField()
-    y = serializers.IntegerField()
-    z = serializers.IntegerField()
 
-class Pose(serializers.Serializer):
-    class Coord(serializers.Serializer):
-        x = serializers.IntegerField()
-        y = serializers.IntegerField()
-        z = serializers.IntegerField()
-        joint = serializers.CharField()
 
-    coords = serializers.ListSerializer[Coord](
-        child=Coord()
-    )
-
-class Estimator(serializers.Serializer):
-    participant = serializers.IntegerField(required=True,)
-    is_start = serializers.BooleanField(required=False)
-    is_stop = serializers.BooleanField(required=False)
-    counter = serializers.IntegerField(required=False)
-    pose = Pose(required=False)
-    ball = Ball(required=False)
-    ts = serializers.DateTimeField()
 
 class ML:
     class MessageType(enum.Enum):
@@ -51,5 +29,27 @@ class ML:
 
         ball : Optional[Ball] = None
         pose : Optional[Pose] = None
-        count : int = 0
+        count : int = 1
         ts : Optional[datetime.datetime] = None
+
+    class KickupSerializer(serializers.Serializer):
+        class Ball(serializers.Serializer):
+            x = serializers.IntegerField()
+            y = serializers.IntegerField()
+            z = serializers.IntegerField()
+
+        class Pose(serializers.Serializer):
+            class Joint(serializers.Serializer):
+                x = serializers.IntegerField()
+                y = serializers.IntegerField()
+                z = serializers.IntegerField()
+                joint = serializers.CharField()
+
+            joints = serializers.ListSerializer[Joint](
+                child=Joint()
+            )
+
+        ball = Ball(required=False)
+        pose = Pose(required=False)
+        count = serializers.IntegerField(default=1)
+        ts = serializers.DateTimeField()

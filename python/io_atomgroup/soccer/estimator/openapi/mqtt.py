@@ -12,7 +12,7 @@ class Kickup(rest_framework.serializers.Serializer):
 
 @drf_yasg.utils.swagger_auto_schema(
     methods=['PUT'],
-    request_body=Kickup,
+    request_body=ML.KickupSerializer,
     #responses={
     #    200: drf_yasg.openapi.Response(
     #        'participant data',

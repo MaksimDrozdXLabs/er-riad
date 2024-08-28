@@ -2,6 +2,7 @@ import drf_yasg.utils
 import drf_yasg.openapi
 from django.urls import path
 import rest_framework.decorators
+from ..models import Sio
 from ...participant.serializers import ParticipantSerializer
 
 class ParticipantUpdated(rest_framework.serializers.Serializer):
@@ -30,5 +31,9 @@ def participant_updated(*args, **kwargs):
     raise NotImplementedError
 
 urlpatterns = [
-    path(r'participant.updated', participant_updated, name='participant_updated',),
+    path(
+        Sio.MessageType.participant_updated.value,
+        participant_updated,
+        name=Sio.MessageType.participant_updated.name,
+    ),
 ]
