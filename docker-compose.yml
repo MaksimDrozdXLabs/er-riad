@@ -2,17 +2,24 @@ version: '3'
 
 services:
   nginx:
-    image: nginx:latest
+    #image: nginx:latest
     container_name: nginx
+    build:
+      context: .
+      dockerfile: docker/nginx/Dockerfile
     volumes:
       - ./docker/nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./docker/nginx/:/app/docker/nginx:ro
       - ./tmp/static:/static:ro
+      - ./tmp/rtmp:/rtmp:rw
     env_file:
       - ".env"
     ports:
-      - ${NGINX_PORTS:-127.0.0.1:80:80}
+      - ${NGINX_HTTP_PORTS:-127.0.0.1:80:80}
+      - ${NGINX_RTMP_PORTS:-127.0.0.1:1935:1935}
     networks:
       - soccer
+
   mqtt:
     # image: eclipse-mosquitto
     container_name: mqtt
