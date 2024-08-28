@@ -9,7 +9,7 @@ ENV \
     PYTHONUNBUFFERED=1 \
     PYTHONFAULTHANDLER=1
 
-COPY deps/django-celery-beat deps/django-celery-beat
+COPY deps/django-celery-beat-fork deps/django-celery-beat-fork
 COPY requirements.txt .
 RUN pip3 install -r requirements.txt
 # RUN ipython3 profile create
