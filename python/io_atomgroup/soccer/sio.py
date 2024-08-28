@@ -9,6 +9,8 @@ sio = socketio.AsyncServer(
     async_mode='asgi',
     cors_allowed_origins='*',
     client_manager=mgr,
+    ping_timeout=5,
+    ping_interval=5,
     #logger=True,
     #engineio_logger=True,
 )
