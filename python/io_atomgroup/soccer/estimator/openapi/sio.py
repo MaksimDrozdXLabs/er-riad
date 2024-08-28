@@ -21,6 +21,12 @@ class ParticipantUpdated(rest_framework.serializers.Serializer):
 )
 @rest_framework.decorators.api_view(['POST'])
 def participant_updated(*args, **kwargs):
+    '''
+        being trigger when score has been updated
+        for a Participant with status=started
+        by an ML estimator
+    '''
+
     raise NotImplementedError
 
 urlpatterns = [
