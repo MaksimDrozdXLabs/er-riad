@@ -1,7 +1,9 @@
 import celery
+import time
 from typing import (Optional, Literal, List)
 import pydantic_core
 import logging
+from ...lib.celery import Service
 from .serializers import ML
 
 
@@ -134,6 +136,14 @@ def task_process_estimator_raw(
             if elapsed_get() > max_time:
                 break
 
-@celery.shared_task()
+@celery.shared_task(track_start=True,)
 def task_process_estimator(*args, **kwargs):
-    return task_process_estimator_raw(*args, **kwargs)
+    try:
+        return task_process_estimator_raw(*args, **kwargs)
+    except:
+        celery.current_app.current_task.apply_async(
+            args=args,
+            kwargs=kwargs,
+            countdown=4,
+        )
+        raise
