@@ -16,7 +16,7 @@ sio = socketio.AsyncServer(
     client_manager=mgr,
     ping_timeout=5,
     ping_interval=5,
-    #transports=["websocket"],
+    transports=["websocket"],
     #logger=True,
     #engineio_logger=True,
 )
