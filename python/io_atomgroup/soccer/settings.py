@@ -49,17 +49,27 @@ if 'WEB_CORS_ORIGIN_WHITELIST' in os.environ:
     FASTAPI_CORS_ALLOW_ORIGINS = CORS_ORIGIN_WHITELIST
 else:
     CORS_ORIGIN_ALLOW_ALL = True
-    FASTAPI_CORS_ALLOW_ORIGINS = None
+    FASTAPI_CORS_ALLOW_ORIGINS = ['*']
 
 if 'WEB_CSRF_TRUSTED_ORIGINS' in os.environ:
     CSRF_TRUSTED_ORIGINS = json.loads(os.environ['WEB_CSRF_TRUSTED_ORIGINS'])
 else:
     CSRF_TRUSTED_ORIGINS = ["http://127.0.0.1"]
 
+if 'WEB_NEED_CSRF' in os.environ:
+    NEED_CSRF = json.loads(os.environ['WEB_NEED_CSRF'])
+else:
+    NEED_CSRF = True
+
 # Application definition
 
 REST_FRAMEWORK = {
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination'
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        #'rest_framework.authentication.BasicAuthentication',
+        #'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    ],
 }
 
 
@@ -74,6 +84,7 @@ INSTALLED_APPS = [
     'python.io_atomgroup.soccer.estimator',
     'python.io_atomgroup.soccer.api',
     'rest_framework',
+    'rest_framework.authtoken',
     'django_celery_beat',
     'drf_yasg',
 ]
@@ -83,11 +94,22 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+]
+
+if NEED_CSRF:
+    MIDDLEWARE.extend([
+        'django.middleware.csrf.CsrfViewMiddleware',
+    ])
+
+MIDDLEWARE.extend([
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-]
+])
+
+if NEED_CSRF:
+    MIDDLEWARE.extend([
+        'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    ])
 
 ROOT_URLCONF = 'python.io_atomgroup.soccer.urls'
 
@@ -138,6 +160,8 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+CSRF_COOKIE_HTTPONLY = True
 
 
 # Internationalization
