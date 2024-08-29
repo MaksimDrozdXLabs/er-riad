@@ -15,19 +15,21 @@ from fastapi.middleware.cors import CORSMiddleware
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'python.io_atomgroup.soccer.settings')
 
 from django.core.asgi import get_asgi_application
+from django.conf import settings
 from . import sio
 
 fastapi_app = fastapi.FastAPI()
 
 django_app = get_asgi_application()
 
-fastapi_app.add_middleware(
-    CORSMiddleware,
-    allow_origins=['*'],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+if not settings.FASTAPI_CORS_ALLOW_ORIGINS is None:
+    fastapi_app.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.FASTAPI_CORS_ALLOW_ORIGINS,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
 fastapi_app.mount(
     '/socket.io',
