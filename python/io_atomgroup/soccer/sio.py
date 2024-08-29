@@ -2,8 +2,11 @@ import socketio
 from django.conf import settings
 
 mgr_pub = socketio.AsyncRedisManager(settings.SIO_REDIS, write_only=True,)
+mgr_pub_sync = socketio.RedisManager(settings.SIO_REDIS, write_only=True,)
 
 mgr = socketio.AsyncRedisManager(settings.SIO_REDIS)
+
+mgr_sync = socketio.RedisManager(settings.SIO_REDIS)
 
 sio = socketio.AsyncServer(
     async_mode='asgi',

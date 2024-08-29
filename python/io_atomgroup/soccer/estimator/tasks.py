@@ -116,7 +116,6 @@ def task_process_estimator_raw(
         else:
             raise NotImplementedError
 
-
         logger.info(json.dumps(dict(
             qos=message.qos,
             topic=message.topic,

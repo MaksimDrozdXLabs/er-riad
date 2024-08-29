@@ -30,43 +30,44 @@ async def connect(sid, environ, auth):
         session=await sio.sio.get_session(sid),
     )))
 
-    await sio.sio.emit(
-        Sio.MessageType.participant_updated.value,
-        serializers.ML.KickupSerializer(
-            instance=dict(
-                ts=timezone.now(),
-                count=1,
-                pose=dict(
-                    joints=[
-                        dict(
-                            x=0,
-                            y=0,
-                            z=0,
-                            joint='Head',
-                        ),
-                        dict(
-                            x=0,
-                            y=0,
-                            z=0,
-                            joint='LFoot',
-                        ),
-                        dict(
-                            x=0,
-                            y=0,
-                            z=0,
-                            joint='RFoot',
-                        ),
-                    ],
-                ),
-                ball=dict(
-                    x=0,
-                    y=0,
-                    z=0,
-                ),
-            )
-        ).data,
-        to=sid,
-    )
+    if False:
+        await sio.sio.emit(
+            Sio.MessageType.participant_updated.value,
+            serializers.ML.KickupSerializer(
+                instance=dict(
+                    ts=timezone.now(),
+                    count=1,
+                    pose=dict(
+                        joints=[
+                            dict(
+                                x=0,
+                                y=0,
+                                z=0,
+                                joint='Head',
+                            ),
+                            dict(
+                                x=0,
+                                y=0,
+                                z=0,
+                                joint='LFoot',
+                            ),
+                            dict(
+                                x=0,
+                                y=0,
+                                z=0,
+                                joint='RFoot',
+                            ),
+                        ],
+                    ),
+                    ball=dict(
+                        x=0,
+                        y=0,
+                        z=0,
+                    ),
+                )
+            ).data,
+            to=sid,
+        )
 
 @sio.sio.event
 async def disconnect(sid):

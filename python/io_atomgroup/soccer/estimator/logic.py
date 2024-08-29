@@ -7,11 +7,11 @@ logger = logging.getLogger(__name__)
 
 
 def estimator_process_kickup(kickup: ML.Kickup) -> None:
-    import asgiref.sync
+    # import asgiref.sync
     import django.db.transaction
     from ..participant.models import Participant
     from ..participant.serializers import ParticipantSerializer
-    from ..sio import mgr_pub
+    from ..sio import mgr_pub_sync
     from .models import Sio
 
     with django.db.transaction.atomic():
@@ -38,9 +38,7 @@ def estimator_process_kickup(kickup: ML.Kickup) -> None:
 
         p.save(update_fields=['score'])
 
-        asgiref.sync.async_to_sync(
-            mgr_pub.emit
-        )(
+        mgr_pub_sync.emit(
             Sio.MessageType.participant_updated.value,
             data=dict(
                 participant=ParticipantSerializer(
