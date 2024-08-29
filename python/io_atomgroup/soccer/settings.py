@@ -26,6 +26,9 @@ SECRET_KEY = os.environ.get('WEB_SECRET_KEY', 'django-insecure-qq+75g969@kj0bpu2
 
 # SECURITY WARNING: don't run with debug turned on in production!
 
+CELERY_BROKER_URL = 'redis://redis:6379/0'
+SIO_REDIS = 'redis://redis:6379/1'
+
 if 'WEB_STATIC_VIEW' in os.environ:
     STATIC_VIEW = json.loads(os.environ['WEB_STATIC_VIEW'])
 else:
@@ -43,18 +46,30 @@ else:
 
 if 'WEB_CORS_ORIGIN_WHITELIST' in os.environ:
     CORS_ORIGIN_WHITELIST = json.loads(os.environ['WEB_CORS_ORIGIN_WHITELIST'])
+    FASTAPI_CORS_ALLOW_ORIGINS = CORS_ORIGIN_WHITELIST
 else:
     CORS_ORIGIN_ALLOW_ALL = True
+    FASTAPI_CORS_ALLOW_ORIGINS = ['*']
 
 if 'WEB_CSRF_TRUSTED_ORIGINS' in os.environ:
     CSRF_TRUSTED_ORIGINS = json.loads(os.environ['WEB_CSRF_TRUSTED_ORIGINS'])
 else:
     CSRF_TRUSTED_ORIGINS = ["http://127.0.0.1"]
 
+if 'WEB_NEED_CSRF' in os.environ:
+    NEED_CSRF = json.loads(os.environ['WEB_NEED_CSRF'])
+else:
+    NEED_CSRF = True
+
 # Application definition
 
 REST_FRAMEWORK = {
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination'
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        #'rest_framework.authentication.BasicAuthentication',
+        #'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    ],
 }
 
 
@@ -66,23 +81,35 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'python.io_atomgroup.soccer.participant.apps.ParticipantConfig',
-    'python.io_atomgroup.soccer.leaderboard',
     'python.io_atomgroup.soccer.estimator',
     'python.io_atomgroup.soccer.api',
     'rest_framework',
+    'rest_framework.authtoken',
+    'django_celery_beat',
     'drf_yasg',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+]
+
+if NEED_CSRF:
+    MIDDLEWARE.extend([
+        'django.middleware.csrf.CsrfViewMiddleware',
+    ])
+
+MIDDLEWARE.extend([
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
-]
+])
+
+if NEED_CSRF:
+    MIDDLEWARE.extend([
+        'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    ])
 
 ROOT_URLCONF = 'python.io_atomgroup.soccer.urls'
 
@@ -134,6 +161,8 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+CSRF_COOKIE_HTTPONLY = True
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
@@ -165,7 +194,7 @@ LOGGING = {
     },
     "root": {
         "handlers": ["console"],
-        "level": "WARNING",
+        "level": "INFO",
     },
 }
 

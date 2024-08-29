@@ -1,26 +1,52 @@
+import enum
+import datetime
+import pydantic
+import pydantic_core
+from typing import (Optional, Literal, List)
 from rest_framework import serializers
 
-class Ball(serializers.Serializer):
-    x = serializers.IntegerField()
-    y = serializers.IntegerField()
-    z = serializers.IntegerField()
+class ML:
+    class MessageType(enum.Enum):
+        kickup = 'ml.juggling'
 
-class Pose(serializers.Serializer):
-    class Coord(serializers.Serializer):
-        x = serializers.IntegerField()
-        y = serializers.IntegerField()
-        z = serializers.IntegerField()
-        joint = serializers.CharField()
+    class Kickup(pydantic.BaseModel):
+        class Ball(pydantic.BaseModel):
+            x : int | float
+            y : int | float
+            z : int | float
 
-    coords = serializers.ListSerializer(
-        child=Coord()
-    )
+        class Pose(pydantic.BaseModel):
+            class Joint(pydantic.BaseModel):
+                x : int | float
+                y : int | float
+                z : int | float
+                joint : Literal['Head', 'LFoot', 'RFoot']
 
-class Estimator(serializers.Serializer):
-    participant = serializers.IntegerField(required=True,)
-    is_start = serializers.BooleanField(required=False)
-    is_stop = serializers.BooleanField(required=False)
-    counter = serializers.IntegerField(required=False)
-    pose = Pose(required=False)
-    ball = Ball(required=False)
-    ts = serializers.DateTimeField()
+            joints : List[Joint]
+
+        ball : Optional[Ball] = None
+        pose : Optional[Pose] = None
+        count : int = 1
+        ts : Optional[datetime.datetime] = None
+
+    class KickupSerializer(serializers.Serializer):
+        class Ball(serializers.Serializer):
+            x = serializers.IntegerField()
+            y = serializers.IntegerField()
+            z = serializers.IntegerField()
+
+        class Pose(serializers.Serializer):
+            class Joint(serializers.Serializer):
+                x = serializers.IntegerField()
+                y = serializers.IntegerField()
+                z = serializers.IntegerField()
+                joint = serializers.CharField()
+
+            joints = serializers.ListSerializer[Joint](
+                child=Joint()
+            )
+
+        ball = Ball(required=False)
+        pose = Pose(required=False)
+        count = serializers.IntegerField(default=1)
+        ts = serializers.DateTimeField()

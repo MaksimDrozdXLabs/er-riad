@@ -2,17 +2,24 @@ version: '3'
 
 services:
   nginx:
-    image: nginx:latest
+    #image: nginx:latest
     container_name: nginx
+    build:
+      context: .
+      dockerfile: docker/nginx/Dockerfile
     volumes:
       - ./docker/nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./docker/nginx/:/app/docker/nginx:ro
       - ./tmp/static:/static:ro
+      - ./tmp/rtmp:/rtmp:rw
     env_file:
       - ".env"
     ports:
-      - ${NGINX_PORTS:-127.0.0.1:80:80}
+      - ${NGINX_HTTP_PORTS:-127.0.0.1:80:80}
+      - ${NGINX_RTMP_PORTS:-127.0.0.1:1935:1935}
     networks:
       - soccer
+
   mqtt:
     # image: eclipse-mosquitto
     container_name: mqtt
@@ -23,6 +30,8 @@ services:
       - ./docker/mqtt:/app/docker/mqtt:ro
       - ./docker/mqtt/config:/mosquitto/config:ro
       - ./tmp/mqtt:/app/tmp/mqtt:rw
+    ports:
+      - ${MQTT_PORTS:-127.0.0.1:1883:1883}
     env_file:
       - ".env"
     networks:
@@ -87,7 +96,7 @@ services:
       context: .
       dockerfile: ./docker/backend/Dockerfile
     # image: analytics-app-image:latest
-    command: ["celery", "-A", "python.io_atomgroup.soccer", "worker", "-c", "1"]
+    command: ["celery", "-A", "python.io_atomgroup.soccer", "worker", "-l", "INFO", "-c", "2", "-Q", "celery,admin"]
     volumes:
       - ./:/app:rw
       - ./tmp:/app/tmp:rw

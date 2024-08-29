@@ -2,21 +2,41 @@ from django.urls import include, path, re_path
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
+from drf_yasg.generators import OpenAPISchemaGenerator
+
+class Generator(OpenAPISchemaGenerator):
+    pass
 
 schema_view = get_schema_view(
    openapi.Info(
-      title="Snippets API",
+      title="Football Riyadh Demo API",
       default_version='v1',
-      description="Test description",
       terms_of_service="https://www.google.com/policies/terms/",
       contact=openapi.Contact(email="contact@snippets.local"),
       license=openapi.License(name="BSD License"),
    ),
+   patterns=[
+       re_path(
+           r'participant/',
+           include('python.io_atomgroup.soccer.participant.urls'),
+           name='participant',
+       ),
+       re_path(
+           r'socket.io/',
+           include('python.io_atomgroup.soccer.estimator.openapi.sio'),
+           name='socketio',
+       ),
+       re_path(
+           r'mqtt/',
+           include('python.io_atomgroup.soccer.estimator.openapi.mqtt'),
+           name='mqtt',
+       ),
+   ],
    public=True,
-   permission_classes=(permissions.AllowAny,),
+   permission_classes=[permissions.AllowAny,],
+   generator_class=Generator,
 )
 
-print('blah')
 urlpatterns = [
     #re_path(
     #    r'leaderboard/',
