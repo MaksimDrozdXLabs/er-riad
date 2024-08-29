@@ -140,6 +140,8 @@ def task_process_estimator_raw(
 def task_process_estimator(*args, **kwargs):
     try:
         return task_process_estimator_raw(*args, **kwargs)
+    except SystemExit:
+        raise
     except:
         celery.current_app.current_task.apply_async(
             args=args,

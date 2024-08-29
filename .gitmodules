@@ -1,12 +1,12 @@
 [submodule "deps/frontend"]
 	path = deps/frontend
-	url = ssh://git@gitlab.enigmagroup.tech:2224/enigma/computer-vision/frontend/interactive-challenge-platform
+	url = https://gitlab.enigmagroup.tech/enigma/computer-vision/frontend/interactive-challenge-platform
 [submodule "deps/backend-example"]
 	path = deps/backend-example
-	url = ssh://git@gitlab.enigmagroup.tech:2224/enigma/computer-vision/backend/analytics-service.git
+	url = https://gitlab.enigmagroup.tech/enigma/computer-vision/backend/analytics-service
 [submodule "deps/metrics_gateway_client"]
 	path = deps/metrics_gateway_client
-	url = ssh://git@gitlab.enigmagroup.tech:2224/enigma/computer-vision/backend/metrics-gateway-client.git
+	url = https://gitlab.enigmagroup.tech/enigma/computer-vision/backend/metrics-gateway-client
 [submodule "deps/django-celery-beat"]
 	path = deps/django-celery-beat
 	url = https://github.com/celery/django-celery-beat
