@@ -1,6 +1,6 @@
 [submodule "deps/frontend"]
 	path = deps/frontend
-	url = ssh://git@gitlab.enigmagroup.tech:2224/enigma/computer-vision/computer-vision-frontend.git
+	url = ssh://git@gitlab.enigmagroup.tech:2224/enigma/computer-vision/frontend/interactive-challenge-platform
 [submodule "deps/backend-example"]
 	path = deps/backend-example
 	url = ssh://git@gitlab.enigmagroup.tech:2224/enigma/computer-vision/backend/analytics-service.git
