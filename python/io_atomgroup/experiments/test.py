@@ -1,4 +1,5 @@
 import numpy as np
+import functools
 import time
 import threading
 import datetime
@@ -41,13 +42,17 @@ class Test:
                 #gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
                 gray = frame
 
+                frame2 = cv2.resize(
+                    frame,
+                    #(1280 // 2, 720 // 2),
+                    (1280, 720),
+                    interpolation=cv2.INTER_AREA
+                )
+
                 with lock:
-                    state['frame'] = cv2.resize(
-                        frame,
-                        #(1280 // 2, 720 // 2),
-                        (1280, 720),
-                        interpolation=cv2.INTER_AREA
-                    )
+                    with self.state['frame_cv']:
+                        state['frame'] = frame2
+                        self.state['frame_cv'].notify()
                     # state['frame'] = frame
 
                 # Display the resulting frame
@@ -66,12 +71,18 @@ class Test:
 
         while True:
             with lock:
-                if state['frame'] is None:
+                with self.state['frame_cv']:
+                    if 'frame_ml' in state:
+                        frame = state['frame_ml']
+                    else:
+                        frame = state['frame']
+
+                if frame is None:
                     frame_bytes = b''
                 else:
                     frame_bytes = cv2.imencode(
                         ".jpg",
-                        state['frame'],
+                        frame,
                         #[cv2.IMWRITE_JPEG_QUALITY, 50, cv2.IMWRITE_JPEG_PROGRESSIVE, 1],
                         [cv2.IMWRITE_JPEG_QUALITY, 75, cv2.IMWRITE_JPEG_PROGRESSIVE, 1],
                     )[1].tobytes()
@@ -106,7 +117,10 @@ class Test:
         ''')
 
 
-    def run(self):
+    def run(
+        self,
+        transform_cb,
+    ):
         self.cap = cv.VideoCapture(0)
         self.cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter.fourcc(*"MJPG"))
         self.cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0)
@@ -117,14 +131,29 @@ class Test:
 
         self.lock = threading.Lock()
 
+        self.transform_cb = transform_cb
+
+        self.state['frame_cv'] = threading.Condition()
         self.state['workers']['cv'] = threading.Thread(target=self.camera_worker)
         self.state['workers']['cv'].start()
+
+        self.state['workers']['ml'] = threading.Thread(
+            target=functools.partial(
+                transform_cb,
+                frame_get=lambda: self.state['frame'],
+                frame_set=lambda frame: self.state.update(frame_ml=frame),
+                frame_cv=self.state['frame_cv'],
+            )
+        )
+        self.state['workers']['ml'].start()
 
         app = fastapi.FastAPI()
         app.route("/juggling/video_feed")(self.video_feed)
         app.route("/juggling/index.html")(self.index)
 
-        return app
+        self.app = app
 
 if __name__ == '__main__':
-    app = Test().run()
+    t = Test()
+    t.run()
+    app = t.app
