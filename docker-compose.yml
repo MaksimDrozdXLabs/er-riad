@@ -20,6 +20,54 @@ services:
     networks:
       - soccer
 
+  juggling:
+    # image: eclipse-mosquitto
+    # runtime: nvidia
+    container_name: juggling
+    build:
+      context: .
+      dockerfile: docker/juggling/Dockerfile
+    shm_size: '16gb'
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    # entrypoint: ["tini", "--"]
+    environment:
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility,video
+      - VIDEO=${JUGGLING_VIDEO:-/app/tmp/static/football-v1.mp4}
+      #- OUTPUT_PATH=${JUGGLING_OUTPUT_PATH:-rtmp://127.0.0.1:1935/live/app}
+      #- OUTPUT_PATH=${JUGGLING_OUTPUT_PATH:-rtmp://nginx:1935/live/test}
+      - OUTPUT_PATH=${JUGGLING_OUTPUT_PATH:-rtmp://rtsp:1935/live/test}
+      #- OUTPUT_PATH=/app/tmp/juggling/2.mp4
+      - MQTT_HOST=${JUGGLING_MQTT_HOST:-mqtt}
+      - MQTT_PORT=${JUGGLING_MQTT_PORT:-1883}
+      - USE_MQTT=${JUGGLING_USE_MQTT:-1}
+    entrypoint: ["tini", "--"]
+    #command: ["python3", "/app/docker/juggling/wrapper.py"]
+    command: ["bash", "run_in_docker.sh", "--no-listen-output"]
+    volumes:
+      - ./deps/juggling-counting:/app/deps/juggling-counting:rw
+      - ./docker/juggling:/app/docker/juggling:ro
+      - ./tmp/juggling:/app/tmp/juggling:rw
+      - ./tmp/static:/app/tmp/static:rw
+      - ./tmp/juggling/assets:/app/tmp/juggling/assets:ro
+    networks:
+      - soccer
+
+  rtsp:
+    image: bluenviron/mediamtx:latest
+    container_name: rtsp
+    networks:
+      - soccer
+    ports:
+      - 8554:8554
+      - 8888:8888
+      - 8889:8889
+
   mqtt:
     # image: eclipse-mosquitto
     container_name: mqtt
