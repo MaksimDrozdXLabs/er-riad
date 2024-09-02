@@ -55,6 +55,7 @@ COPY ./deps/juggling-counting/requirements.txt requirements.txt
 # install the requirements:
 COPY ./deps/juggling-counting/third_party ./third_party/
 RUN pip3 install ./third_party/metrics-gateway-client
+RUN pip3 install fastapi fastapi[standard] ipython ipdb
 
 # run the command
 ENTRYPOINT ["/usr/bin/bash"]
