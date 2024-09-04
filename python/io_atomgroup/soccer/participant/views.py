@@ -34,19 +34,22 @@ class ParticipantViewSet(viewsets.ModelViewSet):
 
     # @django.db.transaction.atomic()
     def update(self, request, *args, **kwargs):
-        if (
-            kwargs.get('partial') is True and
-            isinstance(request.data, dict) and
-            'pk' in request.data and
-            'status' in request.data
-        ):
-            self.queryset.filter(
-                status=models.Participant.Status.started.value
-            #).select_for_update().update(
-            ).update(
-                status=models.Participant.Status.done.value
-            )
+        from ...lib.redis import lock_get
 
-            # self.queryset.filter(id=int(request.data['pk'])).select_for_update().get()
+        with lock_get('participant.update'):
+            if (
+                kwargs.get('partial') is True and
+                isinstance(request.data, dict) and
+                'pk' in request.data and
+                'status' in request.data
+            ):
+                self.queryset.filter(
+                    status=models.Participant.Status.started.value
+                #).select_for_update().update(
+                ).update(
+                    status=models.Participant.Status.done.value
+                )
 
-        return super().update(request, *args, **kwargs)
+                # self.queryset.filter(id=int(request.data['pk'])).select_for_update().get()
+
+            return super().update(request, *args, **kwargs)

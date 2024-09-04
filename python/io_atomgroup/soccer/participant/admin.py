@@ -11,6 +11,7 @@ class ParticipantAdmin(admin.ModelAdmin):
         'updated',
         'contact',
         'email',
+        'status',
     ]
 
     @admin.action()
