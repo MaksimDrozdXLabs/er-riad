@@ -1,4 +1,5 @@
 import numpy as np
+import numpy
 import functools
 import time
 import threading
@@ -42,12 +43,25 @@ class Test:
                 #gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
                 gray = frame
 
-                frame2 = cv2.resize(
+                frame2 = numpy.pad(
                     frame,
-                    #(1280 // 2, 720 // 2),
-                    (1280, 720),
-                    interpolation=cv2.INTER_AREA
-                )
+                    [
+                        (
+                            (1920 - frame.shape[0]) // 2,
+                        ) * 2,
+                        #(
+                        #    (1920 - frame.shape[1]) // 2,
+                        #) * 2,
+                        (0, 0),
+                        (0,0)
+                    ]
+                )[:, -1080:, :]
+                #frame2 = cv2.resize(
+                #    frame,
+                #    #(1280 // 2, 720 // 2),
+                #    (1280, 720),
+                #    interpolation=cv2.INTER_AREA
+                #)
 
                 with lock:
                     with self.state['frame_cv']:
@@ -121,13 +135,15 @@ class Test:
         self,
         transform_cb,
     ):
-        self.cap = cv.VideoCapture(0)
+        self.cap = cv2.VideoCapture(0, cv2.CAP_V4L2)
         self.cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter.fourcc(*"MJPG"))
         self.cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0)
         self.cap.set(cv2.CAP_PROP_EXPOSURE, 250)
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
-        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
-        #cap.set(cv2.CAP_PROP_FPS, 30.0)
+        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 960)
+        self.cap.set(cv2.CAP_PROP_FPS, 30.0)
+
+        assert self.cap.isOpened()
 
         self.lock = threading.Lock()
 
