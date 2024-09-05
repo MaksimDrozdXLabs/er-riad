@@ -18,81 +18,84 @@ services:
       - ${NGINX_HTTP_PORTS:-127.0.0.1:80:80}
       #- ${NGINX_RTMP_PORTS:-127.0.0.1:1935:1935}
     networks:
-      - soccer
+      drift:
+        ipv4_address: 10.17.0.4
 
-  juggling:
+  drift:
     # image: eclipse-mosquitto
     # runtime: nvidia
-    container_name: juggling
+    container_name: drift
     build:
       context: .
-      dockerfile: docker/juggling/Dockerfile
-    shm_size: '16gb'
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
+      dockerfile: docker/drift/Dockerfile
+#    shm_size: '16gb'
+#    deploy:
+#      resources:
+#        reservations:
+#          devices:
+#            - driver: nvidia
+#              count: 1
+#              capabilities: [gpu]
     # entrypoint: ["tini", "--"]
-    environment:
-      - NVIDIA_DRIVER_CAPABILITIES=compute,utility,video
-      - VIDEO=${JUGGLING_VIDEO:-/app/tmp/static/football-v1.mp4}
+#    environment:
+#      - NVIDIA_DRIVER_CAPABILITIES=compute,utility,video
+#      - VIDEO=${JUGGLING_VIDEO:-/app/tmp/static/football-v1.mp4}
       #- OUTPUT_PATH=${JUGGLING_OUTPUT_PATH:-rtmp://127.0.0.1:1935/live/app}
       #- OUTPUT_PATH=${JUGGLING_OUTPUT_PATH:-rtmp://nginx:1935/live/test}
       #- OUTPUT_PATH=${JUGGLING_OUTPUT_PATH:-rtmp://rtsp:1935/live/test}
-      - OUTPUT_PATH=${JUGGLING_OUTPUT_PATH:-rtmp://0.0.0.0:1935/live/test}
+#      - OUTPUT_PATH=${JUGGLING_OUTPUT_PATH:-rtmp://0.0.0.0:1935/live/test}
       #- OUTPUT_PATH=/app/tmp/juggling/2.mp4
-      - MQTT_HOST=${JUGGLING_MQTT_HOST:-mqtt}
-      - MQTT_PORT=${JUGGLING_MQTT_PORT:-1883}
-      - USE_MQTT=${JUGGLING_USE_MQTT:-1}
-    privileged: true
+#      - MQTT_HOST=${JUGGLING_MQTT_HOST:-mqtt}
+#      - MQTT_PORT=${JUGGLING_MQTT_PORT:-1883}
+#      - USE_MQTT=${JUGGLING_USE_MQTT:-1}
+#    privileged: true
     entrypoint: ["tini", "--"]
     #command: ["python3", "/app/docker/juggling/wrapper.py"]
     #command: ["bash", "run_in_docker.sh", "--no-listen-output"]
     command: ["bash", "run_in_docker.sh",]
     volumes:
-      - /dev/video0:/dev/video0:rw
-      - /dev/video1:/dev/video1:rw
+#      - /dev/video0:/dev/video0:rw
+#      - /dev/video1:/dev/video1:rw
       # - /dev/video2:/dev/video2:rw
       # - /dev/video3:/dev/video3:rw
       - ./python/:/app/python:ro
-      - ./deps/juggling-counting:/app/deps/juggling-counting:rw
-      - ./docker/juggling:/app/docker/juggling:ro
-      - ./tmp/juggling:/app/tmp/juggling:rw
+      - ./deps/drift-ml:/app/deps/drift-ml:rw
+      - ./docker/drift-ml:/app/docker/drift-ml:ro
+      - ./tmp/drift:/app/tmp/drift:rw
       - ./tmp/static:/app/tmp/static:rw
-      - ./tmp/juggling/assets:/app/tmp/juggling/assets:ro
+      - ./tmp/drift/assets:/app/tmp/drift/assets:ro
     networks:
-      - soccer
+      drift:
+        ipv4_address: 10.17.0.3
 
-  rtsp:
-    image: bluenviron/mediamtx:latest
-    container_name: rtsp
-    networks:
-      - soccer
-    ports:
-      - 8554:8554
-      # - 1935:1935
-      - 8888:8888
-      - 8889:8889
-
-  mqtt:
-    # image: eclipse-mosquitto
-    container_name: mqtt
-    build:
-      context: .
-      dockerfile: docker/mqtt/Dockerfile
-    volumes:
-      - ./docker/mqtt:/app/docker/mqtt:ro
-      - ./docker/mqtt/config:/mosquitto/config:ro
-      - ./tmp/mqtt:/app/tmp/mqtt:rw
-    ports:
-      - ${MQTT_PORTS:-127.0.0.1:1883:1883}
-    env_file:
-      - ".env"
-    networks:
-      - soccer
+#  rtsp:
+#    image: bluenviron/mediamtx:latest
+#    container_name: rtsp
+#    networks:
+#      - soccer
+#    ports:
+#      - 8554:8554
+#      # - 1935:1935
+#      - 8888:8888
+#      - 8889:8889
+#
+#  mqtt:
+#    # image: eclipse-mosquitto
+#    container_name: mqtt
+#    build:
+#      context: .
+#      dockerfile: docker/mqtt/Dockerfile
+#    volumes:
+#      - ./docker/mqtt:/app/docker/mqtt:ro
+#      - ./docker/mqtt/config:/mosquitto/config:ro
+#      - ./tmp/mqtt:/app/tmp/mqtt:rw
+#    ports:
+#      - ${MQTT_PORTS:-127.0.0.1:1883:1883}
+#    env_file:
+#      - ".env"
+#    networks:
+#      soccer:
+#        ipv4_address: 10.17.0.2
 
   frontend:
     container_name: frontend
@@ -107,61 +110,70 @@ services:
     env_file:
       - ".env"
     networks:
-      - soccer
+      drift:
+        ipv4_address: 10.17.0.2
 
-  web:
-    container_name: web
-    build:
-      context: .
-      dockerfile: ./docker/backend/Dockerfile
-    # image: analytics-app-image:latest
-    volumes:
-      - ./:/app:rw
-      - ./tmp:/app/tmp:rw
-    env_file:
-      - ".env"
-    networks:
-      - soccer
-
-  celery-beat:
-    container_name: celery-beat
-    build:
-      context: .
-      dockerfile: ./docker/backend/Dockerfile
-    command: ["bash", "/app/docker/celery/beat.sh"]
-    # image: analytics-app-image:latest
-    volumes:
-      - .:/app:ro
-      - ./tmp:/app/tmp:rw
-    env_file:
-      - ".env"
-    networks:
-      - soccer
-
-  redis:
-    image: redis:latest
-    container_name: redis
-    volumes:
-      - ./tmp/redis:/data:rw
-    # environment:
-    networks:
-      - soccer
-
-  celery-worker:
-    container_name: celery-worker
-    build:
-      context: .
-      dockerfile: ./docker/backend/Dockerfile
-    # image: analytics-app-image:latest
-    command: ["celery", "-A", "python.io_atomgroup.soccer", "worker", "-l", "INFO", "-c", "2", "-Q", "celery,admin"]
-    volumes:
-      - ./:/app:rw
-      - ./tmp:/app/tmp:rw
-    env_file:
-      - ".env"
-    networks:
-      - soccer
+#  web:
+#    container_name: web
+#    build:
+#      context: .
+#      dockerfile: ./docker/backend/Dockerfile
+#    # image: analytics-app-image:latest
+#    volumes:
+#      - ./:/app:rw
+#      - ./tmp:/app/tmp:rw
+#    env_file:
+#      - ".env"
+#    networks:
+#      - soccer
+#
+#  celery-beat:
+#    container_name: celery-beat
+#    build:
+#      context: .
+#      dockerfile: ./docker/backend/Dockerfile
+#    command: ["bash", "/app/docker/celery/beat.sh"]
+#    # image: analytics-app-image:latest
+#    volumes:
+#      - .:/app:ro
+#      - ./tmp:/app/tmp:rw
+#    env_file:
+#      - ".env"
+#    networks:
+#      - soccer
+#
+#  redis:
+#    image: redis:latest
+#    container_name: redis
+#    volumes:
+#      - ./tmp/redis:/data:rw
+#    # environment:
+#    networks:
+#      - soccer
+#
+#  celery-worker:
+#    container_name: celery-worker
+#    build:
+#      context: .
+#      dockerfile: ./docker/backend/Dockerfile
+#    # image: analytics-app-image:latest
+#    command: ["celery", "-A", "python.io_atomgroup.soccer", "worker", "-l", "INFO", "-c", "2", "-Q", "celery,admin"]
+#    volumes:
+#      - ./:/app:rw
+#      - ./tmp:/app/tmp:rw
+#    env_file:
+#      - ".env"
+#    networks:
+#      - soccer
 
 networks:
-  soccer:
+  drift:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 10.17.0.0/16
+          gateway: 10.17.0.1
+##          aux_addresses:
+##            frontend: 10.17.0.2
+##            drift-ml: 10.17.0.3
+##            nginx: 10.17.0.40
