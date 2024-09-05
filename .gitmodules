@@ -13,3 +13,6 @@
 [submodule "deps/juggling-counting"]
 	path = deps/juggling-counting
 	url = https://gitlab.enigmagroup.tech/enigma/computer-vision/core/juggling-counting
+[submodule "deps/drift-ml"]
+	path = deps/drift-ml
+	url = https://gitlab.enigmagroup.tech/enigma/computer-vision/auto-moto-core/ryad/minicars_service.git
