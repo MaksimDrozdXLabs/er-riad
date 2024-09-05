@@ -227,7 +227,7 @@ class Test:
         if not self.frame_height is None:
             self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.frame_height)
 
-        self.cap.set(cv2.CAP_PROP_FPS, 10.0)
+        self.cap.set(cv2.CAP_PROP_FPS, 30.0)
 
         logger.error(json.dumps(dict(
             width=self.cap.get(cv2.CAP_PROP_FRAME_WIDTH),
