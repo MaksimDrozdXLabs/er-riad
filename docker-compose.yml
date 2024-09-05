@@ -104,7 +104,7 @@ services:
       dockerfile: docker/frontend/Dockerfile
     # image: analytics-app-image:latest
     volumes:
-      - ./deps/frontend:/app/deps/frontend:rw
+      - ./deps/frontend-drift:/app/deps/frontend:rw
       - ./docker/frontend:/app/docker/frontend:ro
       - ./tmp:/app/tmp:rw
     env_file:

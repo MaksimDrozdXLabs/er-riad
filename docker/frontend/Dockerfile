@@ -8,8 +8,8 @@ RUN apk add --no-cache libc6-compat tini bash
 WORKDIR /app/deps/frontend
 
 # Install dependencies based on the preferred package manager
-COPY deps/frontend/package.json ./
-COPY deps/frontend/yarn.lock ./
+COPY deps/frontend-drift/package.json ./
+COPY deps/frontend-drift/yarn.lock ./
 # fix the problem with sharp https://stackoverflow.com/a/77150832
 RUN --mount=type=cache,target=/root/.yarn \
     YARN_CACHE_FOLDER=/root/.yarn \

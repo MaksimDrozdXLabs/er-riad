@@ -16,3 +16,6 @@
 [submodule "deps/drift-ml"]
 	path = deps/drift-ml
 	url = https://gitlab.enigmagroup.tech/enigma/computer-vision/auto-moto-core/ryad/minicars_service.git
+[submodule "deps/frontend-drift"]
+	path = deps/frontend-drift
+	url = https://gitlab.enigmagroup.tech/enigma/computer-vision/frontend/toy-car-racing/
