@@ -1,4 +1,6 @@
 import numpy as np
+import json
+import sys
 import numpy
 import functools
 import time
@@ -8,13 +10,77 @@ import cv2 as cv
 import cv2
 import fastapi
 import fastapi.responses
+import logging
+
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+from typing import (Optional, Any,)
 
 class Test:
-    def __init__(self):
+    def __init__(
+        self,
+        video_args: Optional[list[Any]] = None,
+        url_prefix: Optional[str] = None,
+        padding: Optional[Any] = None,
+        feed_fps: Optional[int] = None,
+        frame_width: Optional[int] = None,
+        frame_height: Optional[int] = None,
+        timestamp_font_size: Optional[int | float] = None,
+        timestamp_offset: Optional[Any] = None,
+    ):
+        self.frame_width = frame_width
+        self.frame_height = frame_height
+
+        if timestamp_font_size is None:
+            timestamp_font_size = 0.5
+
+        self.timestamp_font_size = timestamp_font_size
+
+        if feed_fps is None:
+            feed_fps = 60
+
+        if url_prefix is None:
+            url_prefix = '/juggling',
+
+        self.timestamp_offset = timestamp_offset
+        self.feed_fps = feed_fps
+        self.padding = padding
+        self.url_prefix = url_prefix
+
+        if video_args is None:
+            if sys.platform == 'linux':
+                video_args = [
+                    0,
+                    cv2.CAP_V4L2
+                ]
+            elif sys.platform == 'darwin':
+                self.camera_check()
+                video_args = [
+                    0,
+                ]
+            else:
+                raise NotImplementedError
+
+        self.video_args = video_args
         self.state = dict(
             frame=None,
             workers=dict(),
         )
+
+    def camera_check(self):
+        if sys.platform == 'linux':
+            raise NotImplementedError
+        elif sys.platform == 'darwin':
+            cap = None
+            try:
+                cap = cv2.VideoCapture(1)
+            finally:
+                if not cap is None and cap.isOpened():
+                    cap.release()
+        else:
+            raise NotImplementedError
 
     def camera_worker(self):
         state = self.state
@@ -33,7 +99,15 @@ class Test:
                     time.sleep(0.1)
                     continue
 
-                cv2.putText(frame, f"{datetime.datetime.now().isoformat()}", (900, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 255, 0), 2)
+                if not self.timestamp_offset is None:
+                    cv2.putText(
+                        frame,
+                        f"{datetime.datetime.now().isoformat()}",
+                        self.timestamp_offset,
+                        cv2.FONT_HERSHEY_SIMPLEX,
+                        self.timestamp_font_size,
+                        (0, 255, 0), 2
+                    )
                 # print('\r%s', frame.shape, end='')
                 # if frame is read correctly ret is True
                 if not ret:
@@ -43,19 +117,21 @@ class Test:
                 #gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
                 gray = frame
 
-                frame2 = numpy.pad(
-                    frame,
-                    [
-                        (
-                            (1920 - frame.shape[0]) // 2,
-                        ) * 2,
-                        #(
-                        #    (1920 - frame.shape[1]) // 2,
-                        #) * 2,
-                        (0, 0),
-                        (0,0)
-                    ]
-                )[:, -1080:, :]
+                if not self.padding is None:
+                    frame2 = numpy.pad(
+                        frame,
+                        [
+                            (
+                                (self.padding['height'] - frame.shape[0]) // 2,
+                            ) * 2,
+                            (
+                                (self.padding['width'] - frame.shape[1]) // 2,
+                            ) * 2,
+                            (0,0)
+                        ]
+                    )[:, -self.padding['crop_height_from_bottom']:, :]
+                else:
+                    frame2 = frame
                 #frame2 = cv2.resize(
                 #    frame,
                 #    #(1280 // 2, 720 // 2),
@@ -107,7 +183,7 @@ class Test:
                 frame_bytes + b'\r\n'
             )
             #time.sleep(1.0)
-            time.sleep(1 / 60)
+            time.sleep(1 / self.feed_fps)
 
     def video_feed(self, *args, **kwargs):
         # return the response generated along with the specific media
@@ -117,7 +193,7 @@ class Test:
             media_type="multipart/x-mixed-replace; boundary=frame"
         )
 
-    def index(*args, **kwargs):
+    def index(self, *args, **kwargs):
         return fastapi.responses.HTMLResponse(r'''
     <html>
       <head>
@@ -125,23 +201,39 @@ class Test:
       </head>
       <body>
         <h1>Pi Video Surveillance</h1>
-        <img src="/juggling/video_feed">
+        <img src="{URL_PREFIX}/video_feed">
       </body>
     </html>
-        ''')
+        '''.replace(
+            '{URL_PREFIX}',
+            self.url_prefix,
+        ))
 
 
     def run(
         self,
         transform_cb,
     ):
-        self.cap = cv2.VideoCapture(0, cv2.CAP_V4L2)
+        # self.cap = cv2.VideoCapture(0, cv2.CAP_V4L2)
+        self.cap = cv2.VideoCapture(*self.video_args)
         self.cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter.fourcc(*"MJPG"))
         self.cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0)
         self.cap.set(cv2.CAP_PROP_EXPOSURE, 250)
-        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
-        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 960)
-        self.cap.set(cv2.CAP_PROP_FPS, 30.0)
+        #self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+        #self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 960)
+        if not self.frame_width is None:
+            self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.frame_width)
+
+        if not self.frame_height is None:
+            self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.frame_height)
+
+        self.cap.set(cv2.CAP_PROP_FPS, 10.0)
+
+        logger.error(json.dumps(dict(
+            width=self.cap.get(cv2.CAP_PROP_FRAME_WIDTH),
+            height=self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT),
+            fps=self.cap.get(cv2.CAP_PROP_FPS),
+        )))
 
         assert self.cap.isOpened()
 
@@ -164,8 +256,8 @@ class Test:
         self.state['workers']['ml'].start()
 
         app = fastapi.FastAPI()
-        app.route("/juggling/video_feed")(self.video_feed)
-        app.route("/juggling/index.html")(self.index)
+        app.route("%s/video_feed" % self.url_prefix)(self.video_feed)
+        app.route("%s/index.html" % self.url_prefix)(self.index)
 
         self.app = app
 

@@ -33,15 +33,9 @@ def wm(*argv):
         *argv,
     )
 
-if sys.argv[1] == 'c':
-    c(*sys.argv[2:])
-elif sys.argv[1] == 'lint':
-    c('exec', '-it', 'web', 'mypy', 'python')
-elif sys.argv[1] == 'wm':
-    wm(*sys.argv[2:])
-elif sys.argv[1] == 'wmr':
-    c('exec', '-it', 'web', 'pkill', '-HUP', 'gunicorn')
-elif sys.argv[1] == 'drift-up':
+def drift_python(
+    *argv
+):
     executable_path = os.path.join(
         PROJECT_ROOT,
         'tmp',
@@ -59,7 +53,24 @@ elif sys.argv[1] == 'drift-up':
 
     subprocess.check_call([
         executable_path,
-        'deps/drift-ml/python/io_atomgroup/drift/server.py',
+        *argv,
     ])
+
+if sys.argv[1] == 'c':
+    c(*sys.argv[2:])
+elif sys.argv[1] == 'lint':
+    c('exec', '-it', 'web', 'mypy', 'python')
+elif sys.argv[1] == 'wm':
+    wm(*sys.argv[2:])
+elif sys.argv[1] == 'wmr':
+    c('exec', '-it', 'web', 'pkill', '-HUP', 'gunicorn')
+elif sys.argv[1] == 'drift-up':
+    drift_python(
+        'deps/drift-ml/python/io_atomgroup/drift/server.py',
+    )
+elif sys.argv[1] == 'drift-shell':
+    drift_python(
+        '-m', 'IPython',
+    )
 else:
     raise NotImplementedError
