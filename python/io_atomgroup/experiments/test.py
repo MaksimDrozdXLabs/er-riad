@@ -1,4 +1,5 @@
 import numpy as np
+import asyncio
 import json
 import sys
 import numpy
@@ -9,6 +10,7 @@ import datetime
 import cv2 as cv
 import cv2
 import fastapi
+import fastapi.middleware
 import fastapi.responses
 import logging
 
@@ -23,6 +25,7 @@ class Test:
         self,
         video_args: Optional[list[Any]] = None,
         url_prefix: Optional[str] = None,
+        need_cors: Optional[bool] = None,
         padding: Optional[Any] = None,
         feed_fps: Optional[int] = None,
         frame_width: Optional[int] = None,
@@ -32,6 +35,12 @@ class Test:
     ):
         self.frame_width = frame_width
         self.frame_height = frame_height
+
+        if need_cors is None:
+            need_cors = False
+
+
+        self.need_cors = need_cors
 
         if timestamp_font_size is None:
             timestamp_font_size = 0.5
@@ -154,7 +163,7 @@ class Test:
             cap.release()
             # cv.destroyAllWindows()
 
-    def camera_feed(self):
+    async def camera_feed(self):
         state = self.state
         # cap = self.cap
         lock = self.lock
@@ -167,15 +176,15 @@ class Test:
                     else:
                         frame = state['frame']
 
-                if frame is None:
-                    frame_bytes = b''
-                else:
-                    frame_bytes = cv2.imencode(
-                        ".jpg",
-                        frame,
-                        #[cv2.IMWRITE_JPEG_QUALITY, 50, cv2.IMWRITE_JPEG_PROGRESSIVE, 1],
-                        [cv2.IMWRITE_JPEG_QUALITY, 75, cv2.IMWRITE_JPEG_PROGRESSIVE, 1],
-                    )[1].tobytes()
+            if frame is None:
+                frame_bytes = b''
+            else:
+                frame_bytes = cv2.imencode(
+                    ".jpg",
+                    frame,
+                    #[cv2.IMWRITE_JPEG_QUALITY, 50, cv2.IMWRITE_JPEG_PROGRESSIVE, 1],
+                    [cv2.IMWRITE_JPEG_QUALITY, 75, cv2.IMWRITE_JPEG_PROGRESSIVE, 1],
+                )[1].tobytes()
 
             yield (
                 b'--frame\r\n' +
@@ -183,13 +192,18 @@ class Test:
                 frame_bytes + b'\r\n'
             )
             #time.sleep(1.0)
-            time.sleep(1 / self.feed_fps)
+            #time.sleep(1 / self.feed_fps)
+            await asyncio.sleep(1 / self.feed_fps)
 
-    def video_feed(self, *args, **kwargs):
+    async def video_feed(self, *args, **kwargs):
         # return the response generated along with the specific media
         # type (mime type)
+        async def generator():
+            async for o in self.camera_feed():
+                yield o
+
         return fastapi.responses.StreamingResponse(
-            self.camera_feed(),
+            generator(),
             media_type="multipart/x-mixed-replace; boundary=frame"
         )
 
@@ -209,6 +223,31 @@ class Test:
             self.url_prefix,
         ))
 
+
+    async def ws(self, websocket: fastapi.WebSocket):
+        state = self.state
+        cap = self.cap
+        lock = self.lock
+
+        await websocket.accept()
+
+        while True:
+            with lock:
+                with self.state['frame_cv']:
+                    boxes = state.get('boxes'),
+
+            # data = await websocket.receive_text()
+
+            if not boxes is None:
+                try:
+                    await websocket.send_json(dict(
+                        boxes=boxes,
+                    ))
+                except fastapi.WebSocketDisconnect:
+                    break
+
+
+            await asyncio.sleep(1 / self.feed_fps)
 
     def run(
         self,
@@ -249,15 +288,29 @@ class Test:
             target=functools.partial(
                 transform_cb,
                 frame_get=lambda: self.state['frame'],
-                frame_set=lambda frame: self.state.update(frame_ml=frame),
+                frame_set=lambda frame, **kwargs: self.state.update(
+                    frame_ml=frame, **kwargs
+                ),
                 frame_cv=self.state['frame_cv'],
             )
         )
         self.state['workers']['ml'].start()
 
         app = fastapi.FastAPI()
+
+        if not self.need_cors:
+            app.add_middleware(
+                fastapi.middleware.cors.CORSMiddleware,
+                allow_origins=["*"],
+                allow_credentials=True,
+                allow_methods=["*"],
+                allow_headers=["*"],
+            )
+
         app.route("%s/video_feed" % self.url_prefix)(self.video_feed)
         app.route("%s/index.html" % self.url_prefix)(self.index)
+
+        app.websocket("%s/ws" % self.url_prefix)(self.ws)
 
         self.app = app
 
