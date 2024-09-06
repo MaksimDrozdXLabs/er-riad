@@ -25,10 +25,11 @@ django_app = get_asgi_application()
 if not settings.FASTAPI_CORS_ALLOW_ORIGINS is None:
     fastapi_app.add_middleware(
         CORSMiddleware,
-        allow_origins=settings.FASTAPI_CORS_ALLOW_ORIGINS,
+        # allow_origins=settings.FASTAPI_CORS_ALLOW_ORIGINS,
+        allow_origins=["*"],
         allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
+        allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH"],
+        allow_headers=["Authorization"],
     )
 
 fastapi_app.mount(
