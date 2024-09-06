@@ -55,8 +55,12 @@ services:
     volumes:
       - /dev/video0:/dev/video0:rw
       - /dev/video1:/dev/video1:rw
-      # - /dev/video2:/dev/video2:rw
-      # - /dev/video3:/dev/video3:rw
+      - /dev/video2:/dev/video2:rw
+      - /dev/video3:/dev/video3:rw
+      - /dev/video4:/dev/video4:rw
+      - /dev/video5:/dev/video5:rw
+      - /dev/video6:/dev/video6:rw
+      - /dev/video7:/dev/video7:rw
       - ./python/:/app/python:ro
       - ./deps/juggling-counting:/app/deps/juggling-counting:rw
       - ./docker/juggling:/app/docker/juggling:ro
